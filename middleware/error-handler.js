@@ -10,7 +10,19 @@ const errorHandlerMiddleware = (err, req, res, next) => {
         customError.statusCode = 400;
         customError.msg = `Duplicate key values found for ${Object.keys(err.keyValue)[0]} field` 
     }
-    
+    if(err.name == "ValidationError"){
+
+       customError.statusCode = 400;
+       customError.msg = Object.values(err.errors).map((item) => {
+            return item.message
+       }).join(',')
+
+    }    
+    if(err.name == 'CastError'){
+        customError.statusCode = StatusCodes.NOT_FOUND;
+        customError.msg = `No item found with id ${err.value}`
+    }
+    // return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ err })
     if (customError.statusCode &&  customError.msg){
         return res.status(customError.statusCode).json({msg:customError.msg})
     }
@@ -21,8 +33,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
 // if (err instanceof CustomAPIError) {
     //   return res.status(err.statusCode).json({ msg: err.message })
     // }
-// return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ err })
-//
+
 
 
 
